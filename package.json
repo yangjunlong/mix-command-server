@@ -1,0 +1,41 @@
+{
+    "name": "xpage-command-server",
+    "description": "xpage server command.",
+    "version": "0.0.1",
+    "main": "server.js",
+    "scripts": {
+        "test": "echo \\\"Error: no test specified\\\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yangjunlong/xpage-command-server.git"
+    },
+    "dependencies": {},
+    "keywords": [
+        "xpage",
+        "fis",
+        "server"
+    ],
+    "author": {
+        "name": "sobird",
+        "email": "sobird@126.com"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/yangjunlong/xpage-command-server/blob/master/LICENSE"
+        }
+    ],
+    "bugs": {
+        "url": "https://github.com/yangjunlong/xpage-command-server/issues"
+    },
+    "readme": "",
+    "readmeFilename": "README.md"
+    "homepage": "https://github.com/yangjunlong/xpage-command-server#readme"
+    "maintainers": [
+        {
+            "name": "sobird",
+            "email": "sobird@126.com"
+        }
+    ]
+}
