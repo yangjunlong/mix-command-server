@@ -9,6 +9,11 @@
 var util = require('./lib/util.js');
 var server = require('./lib/server.js');
 
+xpage.server.util = require('./lib/util.js');
+
+xpage.server.DEFAULT_REMOTE_REPOS = '';
+xpage.server.DEFAULT_HTDOCS = '';
+
 exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a web server';
@@ -17,7 +22,7 @@ exports.register = function(commander) {
 
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--htdocs <path>', 'document root', util.setHtdocs, util.getHtdocs())
+        .option('--htdocs <path>', 'document root', String, util.getHtdocs())
         .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type'))
         .option('--rewrite [script]', 'enable rewrite mode', String, fis.config.get('server.rewrite', false))
         .option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
@@ -95,10 +100,10 @@ exports.register = function(commander) {
                             opt[key] = value;
                         }
                     });
-                    console.log(opt);
-                    // server.stop(function() {
-                    //     server.start(opt);
-                    // });
+                    
+                    server.stop(function() {
+                        server.start(opt);
+                    });
                     break;
                 case 'stop':
                     server.stop(function() {
@@ -168,14 +173,4 @@ exports.register = function(commander) {
     commander
         .command('clean')
         .description('clean files in document root');
-
-    commander
-        .command('install <name>')
-        .description('install server framework');
-
-    if (fis.config.get('server.libs')) {
-        commander
-            .command('init')
-            .description('initialize server framework');
-    }
 };

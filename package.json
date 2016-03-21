@@ -1,7 +1,7 @@
 {
     "name": "xpage-command-server",
     "description": "xpage server command.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "main": "server.js",
     "scripts": {
         "test": "echo \\\"Error: no test specified\\\" && exit 1"
@@ -10,7 +10,9 @@
         "type": "git",
         "url": "git+https://github.com/yangjunlong/xpage-command-server.git"
     },
-    "dependencies": {},
+    "dependencies": {
+        "xpage-server-jetty": ">=0.0.1"
+    },
     "keywords": [
         "xpage",
         "fis",
