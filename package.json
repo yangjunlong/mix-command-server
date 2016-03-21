@@ -32,8 +32,8 @@
         "url": "https://github.com/yangjunlong/xpage-command-server/issues"
     },
     "readme": "",
-    "readmeFilename": "README.md"
-    "homepage": "https://github.com/yangjunlong/xpage-command-server#readme"
+    "readmeFilename": "README.md",
+    "homepage": "https://github.com/yangjunlong/xpage-command-server#readme",
     "maintainers": [
         {
             "name": "sobird",
