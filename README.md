@@ -1,2 +1,2 @@
-# xpage-command-server
-xpage-command-server
+# mix-command-server
+mix server command

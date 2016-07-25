@@ -1,20 +1,20 @@
 {
-    "name": "xpage-command-server",
-    "description": "xpage server command.",
-    "version": "0.0.2",
+    "name": "mix-command-server",
+    "description": "mix server command.",
+    "version": "0.0.1",
     "main": "server.js",
     "scripts": {
         "test": "echo \\\"Error: no test specified\\\" && exit 1"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/yangjunlong/xpage-command-server.git"
+        "url": "git+https://github.com/yangjunlong/mix-command-server.git"
     },
     "dependencies": {
-        "xpage-server-jetty": ">=0.0.1"
+        "mix-server-jetty": ">=0.0.1"
     },
     "keywords": [
-        "xpage",
+        "mix",
         "fis",
         "server"
     ],
@@ -25,15 +25,15 @@
     "licenses": [
         {
             "type": "MIT",
-            "url": "https://github.com/yangjunlong/xpage-command-server/blob/master/LICENSE"
+            "url": "https://github.com/yangjunlong/mix-command-server/blob/master/LICENSE"
         }
     ],
     "bugs": {
-        "url": "https://github.com/yangjunlong/xpage-command-server/issues"
+        "url": "https://github.com/yangjunlong/mix-command-server/issues"
     },
     "readme": "",
     "readmeFilename": "README.md",
-    "homepage": "https://github.com/yangjunlong/xpage-command-server#readme",
+    "homepage": "https://github.com/yangjunlong/mix-command-server#readme",
     "maintainers": [
         {
             "name": "sobird",

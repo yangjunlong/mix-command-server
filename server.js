@@ -1,18 +1,22 @@
 /**
- * cli: xpage server [options]
+ * mix command server
+ * 
+ * usage
+ * mix server [options]
  * 
  * @author  Yang,junlong at 2016-03-03 17:51:09 build.
  * @version $Id: server.js 13560 2016-03-17 07:59:44Z yangjunlong $
  */
 
 'use strict';
+
 var util = require('./lib/util.js');
 var server = require('./lib/server.js');
 
-xpage.server.util = require('./lib/util.js');
+mix.server.util = require('./lib/util.js');
 
-xpage.server.DEFAULT_REMOTE_REPOS = '';
-xpage.server.DEFAULT_HTDOCS = '';
+mix.server.DEFAULT_REMOTE_REPOS = '';
+mix.server.DEFAULT_HTDOCS = '';
 
 exports.name = 'server';
 exports.usage = '<command> [options]';
