@@ -5,31 +5,36 @@
  * mix server [options]
  * 
  * @author  Yang,junlong at 2016-03-03 17:51:09 build.
- * @version $Id: server.js 13560 2016-03-17 07:59:44Z yangjunlong $
+ * @version $Id$
  */
 
 'use strict';
 
-var util = require('./lib/util.js');
-var server = require('./lib/server.js');
-
-mix.server.util = require('./lib/util.js');
-
-mix.server.DEFAULT_REMOTE_REPOS = '';
-mix.server.DEFAULT_HTDOCS = '';
+require('./lib/server.js');
 
 exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a web server';
 
+// var child_process = require('child_process');
+// var spawn = child_process.spawn;
+// var args = [
+//         '-k',
+//         // '-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.PollSelectorProvider',
+//         'start'
+//     ];
+// var server = spawn('apachectl', args, { cwd : __dirname, detached: true });
+// console.log(server.pid);
+
+// register mix server commander to mix cli
 exports.register = function(commander) {
 
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--htdocs <path>', 'document root', String, util.getHtdocs())
-        .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type'))
+        .option('--root <path>', 'document root', String, mix.server.util.getHtdocs())
+        .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type', 'java'))
         .option('--rewrite [script]', 'enable rewrite mode', String, fis.config.get('server.rewrite', false))
-        .option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
+        //.option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
@@ -43,75 +48,80 @@ exports.register = function(commander) {
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
             var cmd = args.shift();
-            var htdocs = options.htdocs;
+            var root = options.root;
+            var type = options.type;
             var cwd = fis.util.realpath(process.cwd());
-            var confname = 'fis-conf.js';
-            var conf;
+            var confname = 'mix-conf.js';
+            var conffile;
 
-            if(!conf && fis.util.isFile(root + '/' + confname)){
-                conf = root + '/' + confname;
+            // init project
+            // fis.project.setProjectRoot(cwd);
+
+            if(!conffile && fis.util.isFile(cwd + '/' + confname)){
+                conffile = cwd + '/' + confname;
             }
 
-            if(!conf){
-                //try to find fis-conf.js
+            if(!conffile){
+                // try to find fis-conf.js
                 var pos = cwd.length;
                 do {
                     cwd  = cwd.substring(0, pos);
-                    conf = cwd + '/' + confname;
-                    if(fis.util.exists(conf)){
+                    conffile = cwd + '/' + confname;
+                    if(fis.util.exists(conffile)){
                         root = cwd;
                         break;
                     } else {
-                        conf = false;
+                        conffile = false;
                         pos = cwd.lastIndexOf('/');
                     }
                 } while(pos > 0);
             }
 
-            // require fis-conf.js
-            if(conf){
-                var cache = fis.cache(conf, 'conf');
+            // require mix-conf.js
+            if(conffile){
+                var cache = fis.cache(conffile, 'conf');
                 if(!cache.revert()){
                     options.clean = true;
                     cache.save();
                 }
-                require(conf);
-                fis.emitter.emit('fis-conf:loaded');
+                require(conffile);
+                fis.emitter.emit('mix-conf:loaded');
             }
 
-            if (options.rewrite) {
-                if(options.rewrite != true){
-                    options.script = options.rewrite;
-                    options.rewrite = true;
+            // if(root){
+            //     if(fis.util.exists(root) && !fis.util.isDir(root)){
+            //         fis.log.error('invalid server document root [' + root + ']');
+            //     } else {
+            //         fis.util.mkdir(root);
+            //     }
+            // } else {
+            //     fis.log.error('missing document root');
+            // }
+
+            var opt = {};
+            fis.util.map(options, function(key, value){
+                if(typeof value !== 'object' && key[0] !== '_'){
+                    opt[key] = value;
                 }
+            });
+
+            var server = mix.require('server', type);
+            if (!server) {
+                server = fis.require('server', 'jetty');
             }
 
-            if(htdocs){
-                if(fis.util.exists(htdocs) && !fis.util.isDir(htdocs)){
-                    fis.log.error('invalid server document root [' + htdocs + ']');
-                } else {
-                    fis.util.mkdir(htdocs);
-                }
-            } else {
-                fis.log.error('missing document root');
-            }
-
+            // init server
+            //server.init(opt);
             switch (cmd) {
                 case 'start':
-                    var opt = {};
-                    fis.util.map(options, function(key, value){
-                        if(typeof value !== 'object' && key[0] !== '_'){
-                            opt[key] = value;
-                        }
-                    });
-                    
+                    // restart server
                     server.stop(function() {
                         server.start(opt);
                     });
                     break;
                 case 'stop':
                     server.stop(function() {
-
+                        // TODO nothing
                     });
                     break;
                 case 'restart':
@@ -125,7 +135,7 @@ exports.register = function(commander) {
                     server.info();
                     break;
                 case 'open':
-                    server.open(htdocs);
+                    server.open(root);
                     break;
                 case 'clean':
                     process.stdout.write(' δ '.bold.yellow);
@@ -154,6 +164,7 @@ exports.register = function(commander) {
             }
         });
 
+    // mix server cmd define
     commander
         .command('start')
         .description('start server');
