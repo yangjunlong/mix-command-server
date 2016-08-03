@@ -1,7 +1,7 @@
 {
     "name": "mix-command-server",
     "description": "mix server command.",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "main": "server.js",
     "scripts": {
         "test": "echo \\\"Error: no test specified\\\" && exit 1"
@@ -11,7 +11,7 @@
         "url": "git+https://github.com/yangjunlong/mix-command-server.git"
     },
     "dependencies": {
-        "mix-server-jetty": ">=0.0.1"
+        "mix-server-jetty": "~0.0.1"
     },
     "keywords": [
         "mix",
