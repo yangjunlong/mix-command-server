@@ -31,7 +31,7 @@ exports.register = function(commander) {
 
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--root <path>', 'document root', String, mix.server.util.getHtdocs())
+        .option('--root <path>', 'document root', String, mix.server.getRoot())
         .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type', 'java'))
         .option('--rewrite [script]', 'enable rewrite mode', String, fis.config.get('server.rewrite', false))
         //.option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
@@ -54,9 +54,6 @@ exports.register = function(commander) {
             var confname = 'mix-conf.js';
             var conffile;
 
-            // init project
-            // fis.project.setProjectRoot(cwd);
-
             if(!conffile && fis.util.isFile(cwd + '/' + confname)){
                 conffile = cwd + '/' + confname;
             }
@@ -68,7 +65,7 @@ exports.register = function(commander) {
                     cwd  = cwd.substring(0, pos);
                     conffile = cwd + '/' + confname;
                     if(fis.util.exists(conffile)){
-                        root = cwd;
+                        // TODO nothing
                         break;
                     } else {
                         conffile = false;
@@ -88,16 +85,17 @@ exports.register = function(commander) {
                 fis.emitter.emit('mix-conf:loaded');
             }
 
-            // if(root){
-            //     if(fis.util.exists(root) && !fis.util.isDir(root)){
-            //         fis.log.error('invalid server document root [' + root + ']');
-            //     } else {
-            //         fis.util.mkdir(root);
-            //     }
-            // } else {
-            //     fis.log.error('missing document root');
-            // }
+            if(root){
+                if(fis.util.exists(root) && !fis.util.isDir(root)){
+                    fis.log.error('invalid server document root [' + root + ']');
+                } else {
+                    fis.util.mkdir(root);
+                }
+            } else {
+                fis.log.error('missing document root');
+            }
 
+            // filter options
             var opt = {};
             fis.util.map(options, function(key, value){
                 if(typeof value !== 'object' && key[0] !== '_'){
@@ -105,16 +103,19 @@ exports.register = function(commander) {
                 }
             });
 
+            // require server by type
             var server = mix.require('server', type);
             if (!server) {
-                server = fis.require('server', 'jetty');
+                server = mix.require('server', 'jetty');
             }
+
+            // set process name
+            opt['process'] = 'mix';
 
             // init server
             //server.init(opt);
             switch (cmd) {
                 case 'start':
-                    // restart server
                     server.stop(function() {
                         server.start(opt);
                     });
