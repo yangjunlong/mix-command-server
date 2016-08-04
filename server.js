@@ -104,7 +104,9 @@ exports.register = function(commander) {
             });
 
             // require server by type
-            var server = mix.require('server', type);
+            var server = mix.chdir(__dirname)
+            .require('server', type);
+
             if (!server) {
                 server = mix.require('server', 'jetty');
             }
