@@ -103,19 +103,19 @@ exports.register = function(commander) {
                 }
             });
 
-            // require server by type
-            var server = mix.scope(module).require('server', type);
-            if (!server) {
-                fis.log.warning('unable to load plugin [ mix-server-' + type + '], try: npm install -g mix-server-' + type);
-                fis.log.notice('use default server mix-server-jetty');
-                server = mix.require('server', 'jetty');
-            }
-
             // set process name
             opt['process'] = 'mix';
 
-            // init server
-            //server.init(opt);
+            // require server by type
+            if (cmd) {
+                var server = mix.scope(module).require('server', type);
+                if (!server) {
+                    fis.log.warning('unable to load plugin [ mix-server-' + type + '], try: npm install -g mix-server-' + type);
+                    fis.log.notice('use default server mix-server-jetty');
+                    server = mix.require('server', 'jetty');
+                }
+            }
+
             switch (cmd) {
                 case 'start':
                     server.stop(function() {
