@@ -110,8 +110,9 @@ exports.register = function(commander) {
             if (cmd) {
                 var server = mix.scope(module).require('server', type);
                 if (!server) {
-                    fis.log.warning('unable to load plugin [ mix-server-' + type + '], try: npm install -g mix-server-' + type);
-                    fis.log.notice('use default server mix-server-jetty');
+                    mix.log.warning('unable to load plugin '+ ('mix-server-' + type).green.bold + ', try: npm install -g mix-server-' + type);
+                    mix.log.notice('using default server ' + 'mix-server-jetty'.gray.bold);
+                    console.log('');
                     server = mix.require('server', 'jetty');
                 }
             }
