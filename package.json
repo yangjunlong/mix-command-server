@@ -1,7 +1,7 @@
 {
     "name": "mix-command-server",
     "description": "mix server command.",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "main": "server.js",
     "scripts": {
         "test": "echo \\\"Error: no test specified\\\" && exit 1"
