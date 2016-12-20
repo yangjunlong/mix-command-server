@@ -22,6 +22,7 @@
         "name": "sobird",
         "email": "sobird@126.com"
     },
+    "license": "MIT",
     "licenses": [
         {
             "type": "MIT",

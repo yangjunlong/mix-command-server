@@ -2,7 +2,26 @@
  * mix command server
  * 
  * usage
- * mix server [options]
+ * mix server [options] (start|stop|restart|info|clean|open)
+ *
+ * mix-conf.js:
+ * {
+ *     server: {
+ *         type: 'node', // server type
+ *         port: '',
+ *         rewrite: 'true',
+ *         root: '', // document root
+ *         start: '',
+ *         stop: '',
+ *         restart: '',
+ *         version: '',
+ *         proxy: {
+ *             // server proxy
+ *         }
+ *         timeout: '',
+ *         
+ *     }
+ * }
  * 
  * @author  Yang,junlong at 2016-03-03 17:51:09 build.
  * @version $Id$
@@ -28,7 +47,6 @@ exports.desc = 'launch a web server';
 
 // register mix server commander to mix cli
 exports.register = function(commander) {
-
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', String, mix.server.getRoot())
@@ -59,7 +77,7 @@ exports.register = function(commander) {
             }
 
             if(!conffile){
-                // try to find fis-conf.js
+                // try to find mix-conf.js
                 var pos = cwd.length;
                 do {
                     cwd  = cwd.substring(0, pos);
@@ -106,7 +124,7 @@ exports.register = function(commander) {
             // set process name
             opt['process'] = 'mix';
 
-            // require server by type
+            // require server by type [java php node smarty tomcat jetty apache nginx] etc.
             if (cmd) {
                 var server = mix.scope(module).require('server', type);
                 if (!server) {
