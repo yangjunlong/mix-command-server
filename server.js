@@ -137,8 +137,17 @@ exports.register = function(commander) {
 
             switch (cmd) {
                 case 'start':
-                    server.stop(function() {
-                        server.start(opt);
+                    server.start(opt, function(child_process){
+                        if(child_process.pid) {
+                            server.setPid(child_process.pid);
+
+                            var protocol = opt.https ? "https" : "http";
+                            server.open(protocol + '://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                                process.exit();
+                            });
+                        } else {
+                            mix.log.error('You must pass start method parameters callback(child_process)');
+                        }
                     });
                     break;
                 case 'stop':
