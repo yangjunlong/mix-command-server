@@ -63,6 +63,7 @@ exports.register = function(commander) {
         .option('--exclude <glob>', 'clean exclude filter', String)
         .option('--https', 'start https server')
         .action(function(){
+            var defaults = mix.server.options();
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
             var cmd = args.shift();
@@ -71,6 +72,13 @@ exports.register = function(commander) {
             var cwd = fis.util.realpath(process.cwd());
             var confname = 'mix-conf.js';
             var conffile;
+
+            // 首次启动初始化
+            if(!defaults.init) {
+                fis.util.copy(__dirname + '/htdocs/', mix.server.getRoot());
+
+                options.init = true;
+            }
 
             if(!conffile && fis.util.isFile(cwd + '/' + confname)){
                 conffile = cwd + '/' + confname;
@@ -169,14 +177,15 @@ exports.register = function(commander) {
                     server.open(root);
                     break;
                 case 'clean':
+                    var glob = mix.server.util.glob;
                     process.stdout.write(' δ '.bold.yellow);
                     var now = Date.now();
                     var user_include = fis.config.get('server.clean.include');
                     var user_exclude = fis.config.get('server.clean.exclude');
                     //flow: command => user => default
-                    var include = options.include  ? glob(options.include, htdocs) : (user_include ? glob(user_include, htdocs) : null);
-                    var exclude = options.exclude ? glob(options.exclude, htdocs) : (user_exclude ? glob(user_exclude, htdocs) : /\/WEB-INF\/cgi\//);
-                    fis.util.del(htdocs, include, exclude);
+                    var include = options.include  ? glob(options.include, root) : (user_include ? glob(user_include, root) : null);
+                    var exclude = options.exclude ? glob(options.exclude, root) : (user_exclude ? glob(user_exclude, root) : /\/WEB-INF\/cgi\//);
+                    fis.util.del(root, include, exclude);
                     process.stdout.write((Date.now() - now + 'ms').green.bold);
                     process.stdout.write('\n');
                     break;
