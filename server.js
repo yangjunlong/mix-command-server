@@ -143,20 +143,25 @@ exports.register = function(commander) {
                 }
             }
 
+            // 启动服务
+            function start() {
+                server.start(opt, function(child_process){
+                    if(child_process.pid) {
+                        server.setPid(child_process.pid);
+
+                        var protocol = opt.https ? "https" : "http";
+                        server.open(protocol + '://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                            process.exit();
+                        });
+                    } else {
+                        mix.log.error('You must pass start method parameters callback(child_process)');
+                    }
+                });
+            }
+
             switch (cmd) {
                 case 'start':
-                    server.start(opt, function(child_process){
-                        if(child_process.pid) {
-                            server.setPid(child_process.pid);
-
-                            var protocol = opt.https ? "https" : "http";
-                            server.open(protocol + '://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
-                                process.exit();
-                            });
-                        } else {
-                            mix.log.error('You must pass start method parameters callback(child_process)');
-                        }
-                    });
+                    start();
                     break;
                 case 'stop':
                     server.stop(function() {
@@ -164,7 +169,7 @@ exports.register = function(commander) {
                     });
                     break;
                 case 'restart':
-                    server.stop(server.start);
+                    server.stop(start);
                     break;
                 case 'install':
                     var names = args.shift();
