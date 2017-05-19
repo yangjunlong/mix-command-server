@@ -29,29 +29,17 @@
 
 'use strict';
 
-require('./lib/server.js');
-
 exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a web server';
 
-// var child_process = require('child_process');
-// var spawn = child_process.spawn;
-// var args = [
-//         '-k',
-//         // '-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.PollSelectorProvider',
-//         'start'
-//     ];
-// var server = spawn('apachectl', args, { cwd : __dirname, detached: true });
-// console.log(server.pid);
-
-// register mix server commander to mix cli
 exports.register = function(commander) {
+    var __server = new mix.server();
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--root <path>', 'document root', String, mix.server.getRoot())
-        .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type', 'java'))
-        .option('--rewrite [script]', 'enable rewrite mode', String, fis.config.get('server.rewrite', false))
+        .option('--root <path>', 'document root', String, __server.getRoot())
+        .option('--type <php|java|node>', 'process language', String, mix.config.get('server.type', 'java'))
+        .option('--rewrite [script]', 'enable rewrite mode', String, mix.config.get('server.rewrite', false))
         //.option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
@@ -63,24 +51,17 @@ exports.register = function(commander) {
         .option('--exclude <glob>', 'clean exclude filter', String)
         .option('--https', 'start https server')
         .action(function(){
-            var defaults = mix.server.options();
+            var defaults = __server.option();
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
             var cmd = args.shift();
             var root = options.root;
             var type = options.type;
-            var cwd = fis.util.realpath(process.cwd());
+            var cwd = mix.util.realpath(process.cwd());
             var confname = 'mix-conf.js';
             var conffile;
 
-            // 首次启动初始化
-            if(!defaults.init) {
-                fis.util.copy(__dirname + '/htdocs/', mix.server.getRoot());
-
-                options.init = true;
-            }
-
-            if(!conffile && fis.util.isFile(cwd + '/' + confname)){
+            if(!conffile && mix.util.isFile(cwd + '/' + confname)){
                 conffile = cwd + '/' + confname;
             }
 
@@ -90,7 +71,7 @@ exports.register = function(commander) {
                 do {
                     cwd  = cwd.substring(0, pos);
                     conffile = cwd + '/' + confname;
-                    if(fis.util.exists(conffile)){
+                    if(mix.util.exists(conffile)){
                         // TODO nothing
                         break;
                     } else {
@@ -102,28 +83,28 @@ exports.register = function(commander) {
 
             // require mix-conf.js
             if(conffile){
-                var cache = fis.cache(conffile, 'conf');
+                var cache = mix.cache(conffile, 'conf');
                 if(!cache.revert()){
                     options.clean = true;
                     cache.save();
                 }
                 require(conffile);
-                fis.emitter.emit('mix-conf:loaded');
+                mix.emitter.emit('mix-conf:loaded');
             }
 
             if(root){
-                if(fis.util.exists(root) && !fis.util.isDir(root)){
-                    fis.log.error('invalid server document root [' + root + ']');
+                if(mix.util.exists(root) && !mix.util.isDir(root)){
+                    mix.log.error('invalid server document root [' + root + ']');
                 } else {
-                    fis.util.mkdir(root);
+                    mix.util.mkdir(root);
                 }
             } else {
-                fis.log.error('missing document root');
+                mix.log.error('missing document root');
             }
 
             // filter options
             var opt = {};
-            fis.util.map(options, function(key, value){
+            mix.util.map(options, function(value, key){
                 if(typeof value !== 'object' && key[0] !== '_'){
                     opt[key] = value;
                 }
@@ -134,7 +115,7 @@ exports.register = function(commander) {
 
             // require server by type [java php node smarty tomcat jetty apache nginx] etc.
             if (cmd) {
-                var server = mix.scope(module).require('server', type);
+                var server = mix.require('server', type, module);
                 if (!server) {
                     mix.log.warning('unable to load plugin '+ ('mix-server-' + type).green.bold + ', try: npm install -g mix-server-' + type);
                     mix.log.notice('using default server ' + 'mix-server-jetty'.gray.bold);
@@ -185,22 +166,22 @@ exports.register = function(commander) {
                     var glob = mix.server.util.glob;
                     process.stdout.write(' δ '.bold.yellow);
                     var now = Date.now();
-                    var user_include = fis.config.get('server.clean.include');
-                    var user_exclude = fis.config.get('server.clean.exclude');
+                    var user_include = mix.config.get('server.clean.include');
+                    var user_exclude = mix.config.get('server.clean.exclude');
                     //flow: command => user => default
                     var include = options.include  ? glob(options.include, root) : (user_include ? glob(user_include, root) : null);
                     var exclude = options.exclude ? glob(options.exclude, root) : (user_exclude ? glob(user_exclude, root) : /\/WEB-INF\/cgi\//);
-                    fis.util.del(root, include, exclude);
+                    mix.util.del(root, include, exclude);
                     process.stdout.write((Date.now() - now + 'ms').green.bold);
                     process.stdout.write('\n');
                     break;
                 case 'init':
-                    var libs = fis.config.get('server.libs');
-                    if (fis.util.is(libs, 'Array')) {
+                    var libs = mix.config.get('server.libs');
+                    if (mix.util.is(libs, 'Array')) {
                         libs.forEach(function(name) {
                             download(name);
                         });
-                    } else if(fis.util.is(libs, 'String')) {
+                    } else if(mix.util.is(libs, 'String')) {
                         download(libs);
                     }
                     break;
