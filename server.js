@@ -53,7 +53,15 @@ exports.register = function(commander) {
         .action(function(){
             var defaults = __server.option();
             var args = Array.prototype.slice.call(arguments);
-            var options = args.pop();
+            
+            // filter options
+            var options = {};
+            mix.util.map(args.pop(), function(value, key){
+                if(typeof value !== 'object' && key[0] !== '_'){
+                    options[key] = value;
+                }
+            });
+
             var cmd = args.shift();
             var root = options.root;
             var type = options.type;
@@ -102,16 +110,8 @@ exports.register = function(commander) {
                 mix.log.error('missing document root');
             }
 
-            // filter options
-            var opt = {};
-            mix.util.map(options, function(value, key){
-                if(typeof value !== 'object' && key[0] !== '_'){
-                    opt[key] = value;
-                }
-            });
-
             // set process name
-            opt['process'] = 'mix';
+            options['process'] = 'mix';
 
             // require server by type [java php node smarty tomcat jetty apache nginx] etc.
             if (cmd) {
@@ -119,19 +119,18 @@ exports.register = function(commander) {
                 if (!server) {
                     mix.log.warning('unable to load plugin '+ ('mix-server-' + type).green.bold + ', try: npm install -g mix-server-' + type);
                     mix.log.notice('using default server ' + 'mix-server-jetty'.gray.bold);
-                    console.log('');
                     server = mix.require('server', 'jetty');
                 }
             }
 
             // 启动服务
             function start() {
-                server.start(opt, function(child_process){
-                    if(child_process.pid) {
-                        server.setPid(child_process.pid);
-
-                        var protocol = opt.https ? "https" : "http";
-                        server.open(protocol + '://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                server.start(options, function(cp, option){
+                    if(cp.pid) {
+                        server.setPid(cp.pid);
+                        server.option(option);
+                        var protocol = option.https ? "https" : "http";
+                        mix.util.open(protocol + '://127.0.0.1' + (option.port == 80 ? '/' : ':' + option.port + '/'), function(){
                             process.exit();
                         });
                     } else {
@@ -153,17 +152,17 @@ exports.register = function(commander) {
                     server.stop(start);
                     break;
                 case 'install':
-                    var names = args.shift();
-                    download(names);
+                    //var names = args.shift();
+                    //download(names);
                     break;
                 case 'info':
                     server.info();
                     break;
                 case 'open':
-                    server.open(root);
+                    server.open();
                     break;
                 case 'clean':
-                    var glob = mix.server.util.glob;
+                    var glob = mix.util.glob;
                     process.stdout.write(' δ '.bold.yellow);
                     var now = Date.now();
                     var user_include = mix.config.get('server.clean.include');
@@ -176,14 +175,14 @@ exports.register = function(commander) {
                     process.stdout.write('\n');
                     break;
                 case 'init':
-                    var libs = mix.config.get('server.libs');
-                    if (mix.util.is(libs, 'Array')) {
-                        libs.forEach(function(name) {
-                            download(name);
-                        });
-                    } else if(mix.util.is(libs, 'String')) {
-                        download(libs);
-                    }
+                    // var libs = mix.config.get('server.libs');
+                    // if (mix.util.is(libs, 'Array')) {
+                    //     libs.forEach(function(name) {
+                    //         download(name);
+                    //     });
+                    // } else if(mix.util.is(libs, 'String')) {
+                    //     download(libs);
+                    // }
                     break;
                 default :
                     commander.help();
