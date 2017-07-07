@@ -2,7 +2,7 @@
  * mix command server
  * 
  * usage
- * mix server [options] (start|stop|restart|info|clean|open)
+ * mix server <command> [options] (start|stop|restart|info|clean|open)
  *
  * mix-conf.js:
  * {
@@ -33,11 +33,39 @@ exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a web server';
 
-exports.register = function(commander) {
-    var __server = new mix.server();
+//sub command
+exports.command = function(commander) {
     commander
+        .command('start')
+        .description('start server');
+
+    commander
+        .command('stop')
+        .description('shutdown server');
+
+    commander
+        .command('restart')
+        .description('restart server');
+
+    commander
+        .command('info')
+        .description('output server info');
+
+    commander
+        .command('open')
+        .description('open document root directory');
+
+    commander
+        .command('clean')
+        .description('clean files in document root');
+
+    return commander;
+};
+
+exports.option = function(commander){
+    return commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--root <path>', 'document root', String, __server.getRoot())
+        .option('--root <path>', 'document root', String)
         .option('--type <php|java|node>', 'process language', String, mix.config.get('server.type', 'java'))
         .option('--rewrite [script]', 'enable rewrite mode', String, mix.config.get('server.rewrite', false))
         //.option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
@@ -50,8 +78,10 @@ exports.register = function(commander) {
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
         .option('--https', 'start https server')
-        .action(function(){
-            var defaults = __server.option();
+};
+
+exports.action = function() {
+    var defaults = {};
             var args = Array.prototype.slice.call(arguments);
             
             // filter options
@@ -107,21 +137,21 @@ exports.register = function(commander) {
                     mix.util.mkdir(root);
                 }
             } else {
-                mix.log.error('missing document root');
+                //mix.log.error('missing document root');
             }
 
             // set process name
             options['process'] = 'mix';
 
             // require server by type [java php node smarty tomcat jetty apache nginx] etc.
-            if (cmd) {
-                var server = mix.require('server', type, module);
-                if (!server) {
-                    mix.log.warning('unable to load plugin '+ ('mix-server-' + type).green.bold + ', try: npm install -g mix-server-' + type);
-                    mix.log.notice('using default server ' + 'mix-server-jetty'.gray.bold);
-                    server = mix.require('server', 'jetty');
-                }
-            }
+            // if (cmd) {
+            //     var server = mix.require('server', type, module);
+            //     if (!server) {
+            //         mix.log.warning('unable to load plugin '+ ('mix-server-' + type).green.bold + ', try: npm install -g mix-server-' + type);
+            //         mix.log.notice('using default server ' + 'mix-server-jetty'.gray.bold);
+            //         server = mix.require('server', 'jetty');
+            //     }
+            // }
 
             // 启动服务
             function start() {
@@ -185,32 +215,6 @@ exports.register = function(commander) {
                     // }
                     break;
                 default :
-                    commander.help();
+                    this.help();
             }
-        });
-
-    // mix server cmd define
-    commander
-        .command('start')
-        .description('start server');
-
-    commander
-        .command('stop')
-        .description('shutdown server');
-
-    commander
-        .command('restart')
-        .description('restart server');
-
-    commander
-        .command('info')
-        .description('output server info');
-
-    commander
-        .command('open')
-        .description('open document root directory');
-
-    commander
-        .command('clean')
-        .description('clean files in document root');
 };

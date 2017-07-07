@@ -1,5 +1,5 @@
 {
-    "name": "@mi/mix-command-server",
+    "name": "mix-command-server",
     "description": "mix server command.",
     "version": "0.1.2",
     "main": "server.js",
@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "mix-server-jetty": ">=0.0.1",
-        "@mi/mix-server-node": ">=0.0.1"
+        "mix-server-node": ">=0.0.1"
     },
     "keywords": [
         "mix",
