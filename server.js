@@ -30,6 +30,7 @@
 'use strict';
 
 exports.name = 'server';
+exports.alias = '';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a web server';
 
@@ -64,22 +65,22 @@ exports.command = function(commander) {
 
 exports.option = function(commander){
     return commander
-        .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--root <path>', 'document root', String)
+        .option('-p, --port <int>', 'server listen port', parseInt, mix.config.get('server.port', 8080))
+        .option('--root <path>', 'document root', String, mix.config.get('server.root'))
         .option('--type <php|java|node>', 'process language', String, mix.config.get('server.type', 'java'))
         .option('--rewrite [script]', 'enable rewrite mode', String, mix.config.get('server.rewrite', false))
-        //.option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
-        .option('--timeout <seconds>', 'start timeout', parseInt, 15)
-        .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
-        .option('--php_exec_args <args>', 'php-cgi arguments', String)
-        .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
-        .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
-        .option('--registry <registry>', 'set npm registry', 'https://registry.npmjs.org')
+        .option('--timeout <seconds>', 'start timeout', parseInt, mix.config.get('server.timeout', 15))
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
         .option('--https', 'start https server')
 };
 
+/**
+ * cli action handler
+ * 
+ * @package mix
+ * @return <Commander>
+ */
 exports.action = function() {
     var defaults = {};
             var args = Array.prototype.slice.call(arguments);
